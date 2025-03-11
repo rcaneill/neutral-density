@@ -29,3 +29,10 @@ start all commands with `poetry run`
 poetry run pytest
 poetry run jupyter lab
 ```
+
+## How to add packages
+
+Run `poetry add package-name`. Note that it can only install pip available
+packages.
+If binary packages are needed, we either install them by hand, or I (Romain)
+can start to build containers (apptainer, docker).
