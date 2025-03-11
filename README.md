@@ -2,7 +2,9 @@
 
 ## How to install
 
-run in a terminal:
+You will first need to [install poetry](https://python-poetry.org/docs/#installation).
+
+Then run in a terminal:
 
 ```bash
 poetry install
@@ -36,3 +38,10 @@ Run `poetry add package-name`. Note that it can only install pip available
 packages.
 If binary packages are needed, we either install them by hand, or I (Romain)
 can start to build containers (apptainer, docker).
+
+## Linting
+
+We use [ruff](https://github.com/astral-sh/ruff) for linting.
+
+You can install [pre-commit](https://pre-commit.com/#install) to run the linting
+automatically at each commit.
