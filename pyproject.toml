@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "neutral-density"
+name = "neutral_density"
 version = "0.1.0"
 description = ""
 authors = ["Romain Caneill <romain.caneill@univ-grenoble-alpes.fr>", "Julien Le Sommer <julien.lesommer@univ-grenoble-alpes.fr>"]
