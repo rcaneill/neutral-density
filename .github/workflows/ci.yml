@@ -1,0 +1,73 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: build (${{ matrix.os }}, ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "macos-latest"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install / build
+      run: |
+        python -m pip install --upgrade pip
+        pip install .
+        
+  test:
+    name: test (ubuntu-latest, ${{ matrix.python-version }}, ${{ matrix.pint }} Pint, packages version ${{ matrix.version }})
+    runs-on: "ubuntu-latest"
+    env:
+      poetry_version: 1.8.2
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        version: ["lock"]
+        include:
+          - python-version: "3.9"
+            version: "minimal"
+            pint: "with"
+          - python-version: "3.12"
+            version: "maximal"
+            pint: "with"
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry==${{ env.poetry_version }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'poetry'
+    - name: update lock file
+      if: matrix.version == 'maximal'
+      run: poetry update
+    - name: Install dependencies
+      run: |
+        poetry install
+    - name: use minimal versions for lock file
+      if: matrix.version == 'minimal'
+      run: |
+        pipx install pdm==2.15.2
+        poetry run pdm lock --strategy direct_minimal_versions -v -G :all
+        poetry run pdm install -v -G :all
+    - name: Test with pytest
+      run: |
+        poetry run pytest neutral-density/tests
