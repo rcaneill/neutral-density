@@ -1,0 +1,11 @@
+*~
+\#*\#
+*.egg-info
+dask-worker-space
+.snakemake
+.ipynb_checkpoints
+__pycache__
+.venv
+.pytest_cache
+
+
