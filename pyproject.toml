@@ -10,6 +10,12 @@ license = "LGPL-3.0-or-later"
 [tool.poetry.dependencies]
 python = "^3.10"
 jax = {extras = ["cuda12"], version = "^0.5.2"}
+jupyterlab = "^4.3.5"
+pytest = "^8.3.5"
+xarray = "^2025.1.2"
+gsw = "^3.6.19"
+gsw-xarray = "^0.4.0"
+netcdf4 = "^1.7.2"
 
 
 [build-system]
