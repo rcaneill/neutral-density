@@ -61,6 +61,26 @@ def gradients_gamma(gamma, e1u, e2v, e3w):
     return gradient_centered(gamma, e1u, e2v, e3w)
 
 
+def _vectorial_product(A, B):
+    """
+    A, B: 3D vectors defined at T point as tuple (Ax, Ay, Az) or list or array
+
+    We want this function to be Jax differentiable.
+    Note: we do not use this function
+
+    return
+    vector defined at T point
+    """
+    # A[2] *= 1e-5 ## N2
+    # B[2] *= 1e-5
+    # A and B should have similar order of magnitude in the 3 directions
+    # (we look as surfaces that are mostly horizontal)
+    out_x = A[2] * B[1] - A[1] * B[2]
+    out_y = -A[2] * B[0] + A[0] * B[2]
+    out_z = A[1] * B[0] - A[0] * B[1]
+    return jax.numpy.array([out_x, out_y, out_z])
+
+
 def cross_product_normalized(
     A, B, normalization=jnp.array([1, 1, 1])[:, jnp.newaxis, jnp.newaxis, jnp.newaxis]
 ):
@@ -86,7 +106,16 @@ def cross_product_normalized(
     return jax.numpy.cross(A * normalization, B * normalization, axisa=0, axisb=0)
 
 
-def loss_at_each_point(gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient):
+def loss_at_each_point(
+    gamma,
+    A,
+    e1u,
+    e2v,
+    e3w,
+    weight_per_point,
+    mask_gradient,
+    normalization=jnp.array([1, 1, 1e-5])[:, jnp.newaxis, jnp.newaxis, jnp.newaxis],
+):
     """
     return C at each point
     """
@@ -95,9 +124,7 @@ def loss_at_each_point(gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient)
             cross_product_normalized(
                 A,
                 gradients_gamma(gamma, e1u, e2v, e3w),
-                normalization=jnp.array([1, 1, 1e-5])[
-                    :, jnp.newaxis, jnp.newaxis, jnp.newaxis
-                ],
+                normalization=normalization,
             ),
             -1,
             0,
