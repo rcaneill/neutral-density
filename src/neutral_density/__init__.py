@@ -119,33 +119,52 @@ def loss_at_each_point(
     """
     return C at each point
     """
-    C = (
-        jax.numpy.moveaxis(
-            cross_product_normalized(
-                A,
-                gradients_gamma(gamma, e1u, e2v, e3w),
-                normalization=normalization,
-            ),
-            -1,
-            0,
-        )
-        * mask_gradient
+    C = jax.numpy.moveaxis(
+        cross_product_normalized(
+            A,
+            gradients_gamma(gamma, e1u, e2v, e3w) * mask_gradient,
+            normalization=normalization,
+        ),
+        -1,
+        0,
     )
     return C
 
 
-def loss_components(gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient):
+def loss_components(
+    gamma,
+    A,
+    e1u,
+    e2v,
+    e3w,
+    weight_per_point,
+    mask_gradient,
+    normalization=jnp.array([1, 1, 1e-5])[:, jnp.newaxis, jnp.newaxis, jnp.newaxis],
+):
     """
     return X**2, Y**2, and Z**2
     """
-    C = loss_at_each_point(gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient)
+    C = loss_at_each_point(
+        gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
+    )
     X2 = jnp.nansum(C[0] ** 2 * weight_per_point)
     Y2 = jnp.nansum(C[1] ** 2 * weight_per_point)
     Z2 = jnp.nansum(C[2] ** 2 * weight_per_point)
     return jnp.array([X2, Y2, Z2])
 
 
-def loss(gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient):
+def loss(
+    gamma,
+    A,
+    e1u,
+    e2v,
+    e3w,
+    weight_per_point,
+    mask_gradient,
+    normalization=jnp.array([1, 1, 1e-5])[:, jnp.newaxis, jnp.newaxis, jnp.newaxis],
+):
     return jax.numpy.nansum(
-        loss_components(gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient)
+        loss_components(
+            gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
+        )
     )
