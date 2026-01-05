@@ -106,7 +106,7 @@ def cross_product_normalized(
     return jax.numpy.cross(A * normalization, B * normalization, axisa=0, axisb=0)
 
 
-def loss_at_each_point(
+def loss_at_each_point_v0(
     gamma,
     A,
     e1u,
@@ -119,15 +119,62 @@ def loss_at_each_point(
     """
     return C at each point
     """
+    gradient_gamma = gradients_gamma(gamma, e1u, e2v, e3w) * mask_gradient
+    C = jnp.abs(
+        jax.numpy.moveaxis(
+            cross_product_normalized(
+                A,
+                gradient_gamma,
+                normalization=normalization,
+            ),
+            -1,
+            0,
+        )
+    )
+    return C
+
+
+def loss1_at_each_point(
+    gamma,
+    A,
+    e1u,
+    e2v,
+    e3w,
+    weight_per_point,
+    mask_gradient,
+    normalization=jnp.array([1, 1, 1e-5])[:, jnp.newaxis, jnp.newaxis, jnp.newaxis],
+):
+    """
+    return first component of loss at each point
+    """
+    gradient_gamma = gradients_gamma(gamma, e1u, e2v, e3w) * mask_gradient
     C = jax.numpy.moveaxis(
         cross_product_normalized(
             A,
-            gradients_gamma(gamma, e1u, e2v, e3w) * mask_gradient,
+            gradient_gamma,
             normalization=normalization,
         ),
         -1,
         0,
     )
+    return C
+
+
+def loss2_at_each_point(
+    gamma,
+    A,
+    e1u,
+    e2v,
+    e3w,
+    weight_per_point,
+    mask_gradient,
+    normalization=jnp.array([1, 1, 1e-5])[:, jnp.newaxis, jnp.newaxis, jnp.newaxis],
+):
+    """
+    return 2nd component of loss at each point
+    """
+    gradient_gamma = gradients_gamma(gamma, e1u, e2v, e3w) * mask_gradient
+    C = (gradient_gamma - A) * mask_gradient
     return C
 
 
@@ -144,12 +191,15 @@ def loss_components(
     """
     return X**2, Y**2, and Z**2
     """
-    C = loss_at_each_point(
+    C1 = loss1_at_each_point(
         gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
     )
-    X2 = jnp.nansum(C[0] ** 2 * weight_per_point)
-    Y2 = jnp.nansum(C[1] ** 2 * weight_per_point)
-    Z2 = jnp.nansum(C[2] ** 2 * weight_per_point)
+    C2 = loss2_at_each_point(
+        gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
+    )
+    X2 = jnp.nansum((C1[0] ** 2 + C2[0] ** 2) * weight_per_point)
+    Y2 = jnp.nansum((C1[1] ** 2 + C2[1] ** 2) * weight_per_point)
+    Z2 = jnp.nansum((C1[2] ** 2 + C2[2] ** 2) * weight_per_point)
     return jnp.array([X2, Y2, Z2])
 
 
@@ -168,3 +218,29 @@ def loss(
             gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
         )
     )
+
+
+def tilde_m1(gamma, omega1=0, omega2=1):
+    """
+    Transform gamma to gamma tilde
+
+    This transformation can be used 1) for the minimisation process,
+    and 2) after the minimisation is done to introduce back the physics
+    (e.g. having values close to 26 to be consistent with older definitions
+    of neutral density).
+
+    Return gamma tilde = (omega2 - omega1)/(max(gamma) - min(gamma)) * (gamma - min(gamma)) + omega1
+
+    Parameters
+    ----------
+    gamma: jnp.array
+    omega1: number
+    omega2: number
+
+    Returns
+    -------
+    jnp.array
+    """
+    return (omega2 - omega1) / (jnp.max(gamma) - jnp.min(gamma)) * (
+        gamma - jnp.min(gamma)
+    ) + omega1
