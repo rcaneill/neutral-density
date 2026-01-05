@@ -162,6 +162,7 @@ def loss1_at_each_point(
 
 def loss2_at_each_point(
     gamma,
+    b,
     A,
     e1u,
     e2v,
@@ -174,12 +175,13 @@ def loss2_at_each_point(
     return 2nd component of loss at each point
     """
     gradient_gamma = gradients_gamma(gamma, e1u, e2v, e3w) * mask_gradient
-    C = (gradient_gamma - A) * mask_gradient
+    C = (b * gradient_gamma - A) * mask_gradient
     return C
 
 
 def loss_components(
     gamma,
+    b,
     A,
     e1u,
     e2v,
@@ -195,16 +197,18 @@ def loss_components(
         gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
     )
     C2 = loss2_at_each_point(
-        gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
+        gamma, b, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
     )
     X2 = jnp.nansum((C1[0] ** 2 + C2[0] ** 2) * weight_per_point)
-    Y2 = jnp.nansum((C1[1] ** 2 + C2[1] ** 2) * weight_per_point)
-    Z2 = jnp.nansum((C1[2] ** 2 + C2[2] ** 2) * weight_per_point)
+    Y2 = jnp.nansum((C1[1] ** 2 + C2[1] ** 2) * weight_per_point) * 1e-6
+    Z2 = jnp.nansum((C1[2] ** 2 + C2[2] ** 2) * weight_per_point) * 1e-12
+    # works when b=1 is forced, and X2=0
     return jnp.array([X2, Y2, Z2])
 
 
 def loss(
     gamma,
+    b,
     A,
     e1u,
     e2v,
@@ -215,7 +219,7 @@ def loss(
 ):
     return jax.numpy.nansum(
         loss_components(
-            gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
+            gamma, b, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
         )
     )
 
