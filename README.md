@@ -1,4 +1,8 @@
-# Make a surface more neutral, using JAX
+# Neutrax :  minimisation based approach to compute neutral density
+
+`neutrax` implements a novel approach based on a minimization-based formulation to compute neutral density. 
+
+It leverages the power of JAX, to efficiently estimate a 3D approximation of neutral density by solving a minimization problem. Given 3D fields of temperature and salinity, neutrax estimates a neutral density field that best satisfies the neutrality condition. 
 
 ## Data we use
 
@@ -10,43 +14,20 @@ wget https://www.ncei.noaa.gov/thredds-ocean/fileServer/woa23/DATA/salinity/netc
 ```
 
 
+## How to install and run
 
+You will first need to install `uv`.
 
-## How to install
-
-You will first need to [install poetry](https://python-poetry.org/docs/#installation).
-
-Then run in a terminal:
+start all commands with `uv run --frozen`
 
 ```bash
-poetry install
-```
-
-## How to run
-
-### Option 1
-
-start a shell in the virtual environment, and then run commands
-
-```bash
-poetry shell
-# then e.g.
-pytest
-jupyter lab
-```
-
-### Option 2
-
-start all commands with `poetry run`
-
-```bash
-poetry run pytest
-poetry run jupyter lab
+uv run --frozen jupyter lab
+uv run --frozen pytest
 ```
 
 ## How to add packages
 
-Run `poetry add package-name`. Note that it can only install pip available
+Run `uv add package-name`. Note that it can only install pip available
 packages.
 If binary packages are needed, we either install them by hand, or I (Romain)
 can start to build containers (apptainer, docker).
