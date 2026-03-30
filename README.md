@@ -1,4 +1,8 @@
-# Make a surface more neutral, using JAX
+# Neutrax :  minimisation based approach to compute neutral density
+
+`neutrax` implements a novel approach based on a minimization-based formulation to compute neutral density. 
+
+It leverages the power of JAX, to efficiently estimate a 3D approximation of neutral density by solving a minimization problem. Given 3D fields of temperature and salinity, neutrax estimates a neutral density field that best satisfies the neutrality condition. 
 
 ## Data we use
 
@@ -8,8 +12,6 @@ cd data
 wget https://www.ncei.noaa.gov/thredds-ocean/fileServer/woa23/DATA/temperature/netcdf/decav/1.00/woa23_decav_t00_01.nc
 wget https://www.ncei.noaa.gov/thredds-ocean/fileServer/woa23/DATA/salinity/netcdf/decav/1.00/woa23_decav_s00_01.nc
 ```
-
-
 
 
 ## How to install and run
