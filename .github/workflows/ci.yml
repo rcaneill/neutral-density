@@ -31,7 +31,7 @@ jobs:
         pip install .
         
   test:
-    name: test (ubuntu-latest, ${{ matrix.python-version }}, ${{ matrix.pint }} Pint, packages version ${{ matrix.version }})
+    name: test (ubuntu-latest, ${{ matrix.python-version }}, packages version ${{ matrix.version }})
     runs-on: "ubuntu-latest"
     env:
       poetry_version: 1.8.2
@@ -43,10 +43,8 @@ jobs:
         include:
           - python-version: "3.12"
             version: "minimal"
-            pint: "with"
           - python-version: "3.14"
             version: "maximal"
-            pint: "with"
     steps:
     - uses: actions/checkout@v4
     - name: Install poetry
