@@ -1,10 +1,3 @@
-import numpy as np
-import xarray as xr
-import cf_xarray
-from xgcm import Grid, generate_grid_ds
-import gsw_xarray as gsw
-
-import jax
 from jax import numpy as jnp
 
 
@@ -111,7 +104,7 @@ def loss(
     mask_gradient,
     normalization=jnp.array([1, 1, 1e-4])[:, jnp.newaxis, jnp.newaxis, jnp.newaxis],
 ):
-    return jax.numpy.nansum(
+    return jnp.nansum(
         squarred_error_vector(
             gamma, A, e1u, e2v, e3w, weight_per_point, mask_gradient, normalization
         )
