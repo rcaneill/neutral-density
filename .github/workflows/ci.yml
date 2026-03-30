@@ -29,43 +29,27 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install .
-        
+
   test:
-    name: test (ubuntu-latest, ${{ matrix.python-version }}, packages version ${{ matrix.version }})
+    name: test (ubuntu-latest, ${{ matrix.python-version }}, ${{ matrix.pint }} Pint, packages version ${{ matrix.resolution }})
     runs-on: "ubuntu-latest"
-    env:
-      poetry_version: 1.8.2
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.12", "3.13", "3.14"]
-        version: ["lock"]
-        include:
-          - python-version: "3.12"
-            version: "minimal"
-          - python-version: "3.14"
-            version: "maximal"
+        pint: ["with", "without"]
+        resolution: ["highest", "lowest-direct"]
     steps:
     - uses: actions/checkout@v4
-    - name: Install poetry
-      run: pipx install poetry==${{ env.poetry_version }}
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - name: Install uv and Python ${{ matrix.python-version }}
+      uses: astral-sh/setup-uv@v6
       with:
         python-version: ${{ matrix.python-version }}
-        cache: 'poetry'
-    - name: update lock file
-      if: matrix.version == 'maximal'
-      run: poetry update
+        activate-environment: true
     - name: Install dependencies
       run: |
-        poetry install
-    - name: use minimal versions for lock file
-      if: matrix.version == 'minimal'
-      run: |
-        pipx install pdm==2.15.2
-        poetry run pdm lock --strategy direct_minimal_versions -v -G :all
-        poetry run pdm install -v -G :all
+        uv sync --resolution ${{matrix.resolution}}
     - name: Test with pytest
       run: |
-        poetry run pytest neutral-density/tests
+        uv run --no-sync pytest tests
+      
