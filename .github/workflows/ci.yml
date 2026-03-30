@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest", "macos-latest"]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.12", "3.13", "3.14"]
 
     steps:
     - uses: actions/checkout@v4
@@ -31,22 +31,20 @@ jobs:
         pip install .
         
   test:
-    name: test (ubuntu-latest, ${{ matrix.python-version }}, ${{ matrix.pint }} Pint, packages version ${{ matrix.version }})
+    name: test (ubuntu-latest, ${{ matrix.python-version }}, packages version ${{ matrix.version }})
     runs-on: "ubuntu-latest"
     env:
       poetry_version: 1.8.2
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.12", "3.13", "3.14"]
         version: ["lock"]
         include:
-          - python-version: "3.9"
-            version: "minimal"
-            pint: "with"
           - python-version: "3.12"
+            version: "minimal"
+          - python-version: "3.14"
             version: "maximal"
-            pint: "with"
     steps:
     - uses: actions/checkout@v4
     - name: Install poetry
